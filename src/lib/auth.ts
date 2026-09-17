@@ -1,0 +1,56 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+
+export type Profile = Tables<"profiles">;
+
+export function useUserId() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["auth", "user"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getUser();
+      return data.user?.id ?? null;
+    },
+    staleTime: 30_000,
+  });
+  return { userId: data ?? null, isLoading };
+}
+
+export function useProfile() {
+  const { userId, isLoading: loadingUser } = useUserId();
+  const { data, isLoading } = useQuery({
+    queryKey: ["profile", userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Profile | null;
+    },
+  });
+  return { userId, profile: data ?? null, isLoading: loadingUser || isLoading };
+}
+
+export function useSignOut() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  return async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/login", replace: true });
+  };
+}
+
+export function initials(name: string | null | undefined) {
+  return (name ?? "?")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}

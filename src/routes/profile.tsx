@@ -4,6 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { Stars, Tag } from "@/components/ui-kit";
 import { reviews } from "@/lib/data";
 import { toast } from "sonner";
+import { useSignOut } from "@/lib/auth";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/profile")({
 });
 
 function Profile() {
+  const signOut = useSignOut();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [editData, setEditData] = useState({
@@ -134,9 +136,9 @@ function Profile() {
             <Link to="/settings" className="btn-ghost w-full">
               Language & settings
             </Link>
-            <Link to="/" className="btn-ghost w-full !text-destructive">
+            <button onClick={signOut} className="btn-ghost w-full !text-destructive">
               Log out
-            </Link>
+            </button>
           </div>
         </aside>
 

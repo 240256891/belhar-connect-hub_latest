@@ -2,8 +2,8 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Tag, Stars } from "@/components/ui-kit";
-import { jobs, rand, type JobStatus } from "@/lib/data";
-import { useJobStatus } from "@/lib/hooks";
+import { rand, type JobStatus } from "@/lib/data";
+import { useJobs, useJobStatus } from "@/lib/hooks";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/member/jobs")({
@@ -25,6 +25,7 @@ const tabs: JobStatus[] = ["Open", "In Progress", "Completed"];
 
 function MyJobs() {
   const [tab, setTab] = useState<JobStatus>("Open");
+  const { jobs, updateJob } = useJobs();
   const { jobStatuses, updateStatus } = useJobStatus();
   const [showConfirm, setShowConfirm] = useState<string | null>(null);
 
@@ -38,6 +39,7 @@ function MyJobs() {
 
   const handleMarkComplete = (jobId: string) => {
     updateStatus(jobId, "Completed");
+    updateJob(jobId, { status: "Completed" });
     toast.success("Job marked as complete");
     setShowConfirm(null);
   };

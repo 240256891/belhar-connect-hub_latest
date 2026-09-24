@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { JobCard, StatCard, Section } from "@/components/ui-kit";
-import { jobs } from "@/lib/data";
-import { useAvailability } from "@/lib/hooks";
+import { useAvailability, useJobs } from "@/lib/hooks";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/worker/dashboard")({
@@ -23,6 +22,7 @@ export const Route = createFileRoute("/worker/dashboard")({
 function WorkerDashboard() {
   const { available, toggleAvailability } = useAvailability();
   const navigate = useNavigate();
+  const { jobs } = useJobs();
   const openJobs = jobs.filter((j) => j.status === "Open").slice(0, 4);
 
   return (

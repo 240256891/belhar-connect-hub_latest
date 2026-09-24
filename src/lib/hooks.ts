@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
+import { jobs as seedJobs, type Job } from "@/lib/data";
 
 // Payment method types
 export type PaymentMethod = {
@@ -94,6 +95,69 @@ export function usePaymentMethods() {
   }, []);
 
   return { methods, addPaymentMethod, removePaymentMethod, setDefault };
+}
+
+export function useJobs() {
+  const [items, setItems] = useState<Job[]>(() => {
+    if (typeof window === "undefined") return seedJobs;
+    const stored = localStorage.getItem("connectlyJobs");
+    return stored ? JSON.parse(stored) : seedJobs;
+  });
+
+  const addJob = useCallback((job: Job) => {
+    setItems((prev) => {
+      const next = [job, ...prev];
+      localStorage.setItem("connectlyJobs", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const updateJob = useCallback((id: string, updates: Partial<Job>) => {
+    setItems((prev) => {
+      const next = prev.map((job) => (job.id === id ? { ...job, ...updates } : job));
+      localStorage.setItem("connectlyJobs", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  return { jobs: items, addJob, updateJob };
+}
+
+export function useSavedJobs() {
+  const [saved, setSaved] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = localStorage.getItem("savedJobs");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const toggleSaved = useCallback((id: string) => {
+    setSaved((prev) => {
+      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      localStorage.setItem("savedJobs", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  return { saved, toggleSaved };
+}
+
+export function useApplications() {
+  const [applied, setApplied] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = localStorage.getItem("workerApplications");
+    return stored ? JSON.parse(stored) : [];
+  });
+
+  const applyToJob = useCallback((id: string) => {
+    setApplied((prev) => {
+      if (prev.includes(id)) return prev;
+      const next = [...prev, id];
+      localStorage.setItem("workerApplications", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  return { applied, applyToJob };
 }
 
 export function useJobDrafts() {

@@ -46,7 +46,6 @@ function Notifications() {
 
   return (
     <AppShell
-      role="member"
       title="Notifications"
       subtitle={unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
       action={

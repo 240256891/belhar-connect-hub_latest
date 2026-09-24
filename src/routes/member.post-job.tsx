@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { categories } from "@/lib/data";
-import { useJobDrafts } from "@/lib/hooks";
+import { categories, type Job } from "@/lib/data";
+import { useJobDrafts, useJobs } from "@/lib/hooks";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/member/post-job")({
@@ -43,6 +43,7 @@ const INITIAL_FORM_STATE: JobFormData = {
 function PostJob() {
   const navigate = useNavigate();
   const { saveDraft, getDraft, removeDraft } = useJobDrafts();
+  const { addJob } = useJobs();
   const [formData, setFormData] = useState<JobFormData>(() => {
     const draft = getDraft("current-job");
     return draft || INITIAL_FORM_STATE;
@@ -100,9 +101,31 @@ function PostJob() {
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const newJob: Job = {
+        id: `job-${Date.now()}`,
+        title: formData.title.trim(),
+        category: formData.category,
+        description: formData.description.trim(),
+        budget: Number(formData.budget),
+        location: formData.location.trim() || "Belhar, Cape Town",
+        postedBy: "Fatima Adams",
+        clientRating: 5,
+        distanceKm: 0,
+        when: formData.datetime
+          ? new Date(formData.datetime).toLocaleString("en-ZA", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "Date to be confirmed",
+        urgent: formData.urgent,
+        status: "Open",
+        applicants: [],
+      };
 
+      addJob(newJob);
       toast.success("Job posted successfully!");
       removeDraft("current-job");
       setFormData(INITIAL_FORM_STATE);

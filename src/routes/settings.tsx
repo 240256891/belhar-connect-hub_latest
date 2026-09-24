@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { usePaymentMethods, useUserPreferences } from "@/lib/hooks";
+import { useProfile, useSignOut } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/settings")({
@@ -20,10 +21,12 @@ export const Route = createFileRoute("/settings")({
 });
 
 function Settings() {
+  const { profile } = useProfile();
+  const signOut = useSignOut();
   const { preferences, updatePreferences } = useUserPreferences();
   const { methods, addPaymentMethod, removePaymentMethod, setDefault } = usePaymentMethods();
   const [showAddPayment, setShowAddPayment] = useState(false);
-  const [newPayment, setNewPayment] = useState({ cardName: "", cardNumber: "", cvv: "" });
+  const [newPayment, setNewPayment] = useState({ cardName: "", cardNumber: "", cvv: "", expiry: "" });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
   const flip = (k: string) => {
@@ -69,7 +72,7 @@ function Settings() {
     };
 
     addPaymentMethod(newMethod);
-    setNewPayment({ cardName: "", cardNumber: "", cvv: "" });
+    setNewPayment({ cardName: "", cardNumber: "", cvv: "", expiry: "" });
     setShowAddPayment(false);
     toast.success("Payment method added successfully");
   };
@@ -88,7 +91,7 @@ function Settings() {
   ];
 
   return (
-    <AppShell role="member" title="Settings" subtitle="Account, notifications and appearance">
+    <AppShell role={profile?.role === "worker" ? "worker" : "member"} title="Settings" subtitle="Account, notifications and appearance">
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="card-surface p-6">
           <h2 className="font-display text-lg font-bold">Account</h2>
@@ -99,12 +102,12 @@ function Settings() {
             <Row label="Location" value="Belhar Ext 15, Cape Town" />
           </div>
           <div className="mt-5 space-y-2">
-            <button className="btn-secondary w-full" title="Edit your profile information">
+            <Link to="/profile" className="btn-secondary w-full" title="Edit your profile information">
               Edit profile
-            </button>
-            <button className="btn-secondary w-full" title="Change your account password">
+            </Link>
+            <Link to="/profile" className="btn-secondary w-full" title="Change your account password">
               Change password
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -228,7 +231,14 @@ function Settings() {
                 </label>
                 <label>
                   <span className="mb-1 block text-sm font-semibold">Expires</span>
-                  <input type="text" className="field" placeholder="MM/YY" disabled />
+                  <input
+                    type="text"
+                    className="field"
+                    placeholder="MM/YY"
+                    maxLength={5}
+                    value={newPayment.expiry}
+                    onChange={(e) => setNewPayment({ ...newPayment, expiry: e.target.value })}
+                  />
                 </label>
               </div>
               <div className="flex gap-2">
@@ -316,19 +326,19 @@ function Settings() {
         <div className="card-surface p-6 lg:col-span-2">
           <h2 className="font-display text-lg font-bold">Support</h2>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <button className="btn-secondary w-full" title="Visit help center">
+            <button onClick={() => toast.info("Help centre articles are being prepared for launch.")} className="btn-secondary w-full" title="Visit help center">
               Help centre
             </button>
-            <button className="btn-secondary w-full" title="Report a problem">
+            <button onClick={() => toast.success("Problem report opened. A support agent will follow up.")} className="btn-secondary w-full" title="Report a problem">
               Report a problem
             </button>
-            <button className="btn-secondary w-full" title="Read community guidelines">
+            <button onClick={() => toast.info("Community guidelines: be respectful, pay fairly, and keep all job communication inside Connectly.")} className="btn-secondary w-full" title="Read community guidelines">
               Community guidelines
             </button>
           </div>
-          <Link to="/" className="btn-ghost mt-4 w-full !text-destructive">
+          <button onClick={signOut} className="btn-ghost mt-4 w-full !text-destructive">
             Log out
-          </Link>
+          </button>
         </div>
       </div>
     </AppShell>

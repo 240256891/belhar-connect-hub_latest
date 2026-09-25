@@ -94,7 +94,17 @@ export function usePaymentMethods() {
     });
   }, []);
 
-  return { methods, addPaymentMethod, removePaymentMethod, setDefault };
+  const markUsed = useCallback((id: string) => {
+    setMethods((prev) => {
+      const updated = prev.map((method) =>
+        method.id === id ? { ...method, lastUsed: "Just now" } : method,
+      );
+      localStorage.setItem("paymentMethods", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  return { methods, addPaymentMethod, removePaymentMethod, setDefault, markUsed };
 }
 
 export function useJobs() {

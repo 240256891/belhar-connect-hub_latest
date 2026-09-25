@@ -11,10 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as CommunityGuidelinesRouteImport } from './routes/community-guidelines'
+import { Route as ContactSupportRouteImport } from './routes/contact-support'
 import { Route as EarningsRouteImport } from './routes/earnings'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ReportProblemRouteImport } from './routes/report-problem'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as MemberDashboardRouteImport } from './routes/member.dashboard'
@@ -38,9 +42,24 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunityGuidelinesRoute = CommunityGuidelinesRouteImport.update({
+  id: '/community-guidelines',
+  path: '/community-guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactSupportRoute = ContactSupportRouteImport.update({
+  id: '/contact-support',
+  path: '/contact-support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EarningsRoute = EarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -56,6 +75,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportProblemRoute = ReportProblemRouteImport.update({
+  id: '/report-problem',
+  path: '/report-problem',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -122,10 +146,14 @@ const WorkerJobJobIdRoute = WorkerJobJobIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact-support': typeof ContactSupportRoute
   '/earnings': typeof EarningsRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/report-problem': typeof ReportProblemRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/member/dashboard': typeof MemberDashboardRoute
@@ -142,10 +170,14 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact-support': typeof ContactSupportRoute
   '/earnings': typeof EarningsRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/report-problem': typeof ReportProblemRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/member/dashboard': typeof MemberDashboardRoute
@@ -163,10 +195,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/community-guidelines': typeof CommunityGuidelinesRoute
+  '/contact-support': typeof ContactSupportRoute
   '/earnings': typeof EarningsRoute
+  '/help': typeof HelpRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/report-problem': typeof ReportProblemRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/member/dashboard': typeof MemberDashboardRoute
@@ -185,10 +221,14 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/community-guidelines'
+    | '/contact-support'
     | '/earnings'
+    | '/help'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/report-problem'
     | '/settings'
     | '/signup'
     | '/member/dashboard'
@@ -205,10 +245,14 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/community-guidelines'
+    | '/contact-support'
     | '/earnings'
+    | '/help'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/report-problem'
     | '/settings'
     | '/signup'
     | '/member/dashboard'
@@ -225,10 +269,14 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/community-guidelines'
+    | '/contact-support'
     | '/earnings'
+    | '/help'
     | '/login'
     | '/notifications'
     | '/profile'
+    | '/report-problem'
     | '/settings'
     | '/signup'
     | '/member/dashboard'
@@ -246,10 +294,14 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CommunityGuidelinesRoute: typeof CommunityGuidelinesRoute
+  ContactSupportRoute: typeof ContactSupportRoute
   EarningsRoute: typeof EarningsRoute
+  HelpRoute: typeof HelpRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
+  ReportProblemRoute: typeof ReportProblemRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   MemberDashboardRoute: typeof MemberDashboardRoute
@@ -280,11 +332,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/community-guidelines': {
+      id: '/community-guidelines'
+      path: '/community-guidelines'
+      fullPath: '/community-guidelines'
+      preLoaderRoute: typeof CommunityGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact-support': {
+      id: '/contact-support'
+      path: '/contact-support'
+      fullPath: '/contact-support'
+      preLoaderRoute: typeof ContactSupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/earnings': {
       id: '/earnings'
       path: '/earnings'
       fullPath: '/earnings'
       preLoaderRoute: typeof EarningsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -306,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report-problem': {
+      id: '/report-problem'
+      path: '/report-problem'
+      fullPath: '/report-problem'
+      preLoaderRoute: typeof ReportProblemRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -398,10 +478,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CommunityGuidelinesRoute: CommunityGuidelinesRoute,
+  ContactSupportRoute: ContactSupportRoute,
   EarningsRoute: EarningsRoute,
+  HelpRoute: HelpRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
+  ReportProblemRoute: ReportProblemRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   MemberDashboardRoute: MemberDashboardRoute,

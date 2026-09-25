@@ -4,7 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { Stars, Tag } from "@/components/ui-kit";
 import { reviews } from "@/lib/data";
 import { toast } from "sonner";
-import { useSignOut } from "@/lib/auth";
+import { useProfile, useSignOut } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -23,28 +24,76 @@ export const Route = createFileRoute("/profile")({
 
 function Profile() {
   const signOut = useSignOut();
+  const { profile } = useProfile();
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [editData, setEditData] = useState({
-    name: "Sipho Mthembu",
+    name: profile?.full_name ?? "Sipho Mthembu",
+    email: "",
+    phone: profile?.phone ?? "",
+    location: profile?.location ?? "",
     about: "I've been doing garden and general maintenance work around Belhar and Bellville South for eight years. I bring my own tools, I'm on time, and I clean up properly before I leave. Available Monday to Saturday.",
   });
   const [password, setPassword] = useState({ current: "", new: "", confirm: "" });
 
-  const handleSaveProfile = () => {
+  const openEditProfile = async () => {
+    const { data } = await supabase.auth.getUser();
+    setEditData((current) => ({
+      ...current,
+      name: profile?.full_name ?? current.name,
+      email: data.user?.email ?? current.email,
+      phone: profile?.phone ?? current.phone,
+      location: profile?.location ?? current.location,
+      about: profile?.bio ?? current.about,
+    }));
+    setShowEditProfile(true);
+  };
+
+  const handleSaveProfile = async () => {
     if (!editData.name.trim()) {
       toast.error("Name is required");
+      return;
+    }
+    if (!editData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editData.email)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
+    if (!editData.phone.trim()) {
+      toast.error("Cellphone number is required");
       return;
     }
     if (editData.about.length < 10) {
       toast.error("About section must be at least 10 characters");
       return;
     }
-    toast.success("Profile updated successfully");
-    setShowEditProfile(false);
+    try {
+      const { data, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!data.user) throw new Error("Please sign in again before editing your profile.");
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: editData.name.trim(),
+          phone: editData.phone.trim(),
+          location: editData.location.trim() || null,
+          bio: editData.about.trim(),
+        })
+        .eq("id", data.user.id);
+      if (profileError) throw profileError;
+      if (data.user.email !== editData.email.trim()) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: editData.email.trim() });
+        if (emailError) throw emailError;
+        toast.success("Profile saved. Check your new email to confirm the address change.");
+      } else {
+        toast.success("Profile updated successfully");
+      }
+      setShowEditProfile(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update your profile");
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!password.current.trim()) {
       toast.error("Current password is required");
       return;
@@ -61,9 +110,36 @@ function Profile() {
       toast.error("Passwords do not match");
       return;
     }
-    toast.success("Password changed successfully");
-    setPassword({ current: "", new: "", confirm: "" });
-    setShowPasswordChange(false);
+    try {
+      const { data, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!data.user) {
+        const storedPassword = localStorage.getItem("workerDemoPassword");
+        if (storedPassword && storedPassword !== password.current) {
+          throw new Error("The current password is incorrect.");
+        }
+        localStorage.setItem("workerDemoPassword", password.new);
+        toast.success("Worker password changed successfully");
+        setPassword({ current: "", new: "", confirm: "" });
+        setShowPasswordChange(false);
+        return;
+      }
+      if (!data.user.email) throw new Error("Your account email could not be found.");
+
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: data.user.email,
+        password: password.current,
+      });
+      if (reauthError) throw new Error("The current password is incorrect.");
+
+      const { error } = await supabase.auth.updateUser({ password: password.new });
+      if (error) throw error;
+      toast.success("Password changed successfully");
+      setPassword({ current: "", new: "", confirm: "" });
+      setShowPasswordChange(false);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to change password");
+    }
   };
 
   return (
@@ -117,7 +193,7 @@ function Profile() {
           <h3 className="font-display font-bold">Settings</h3>
           <div className="mt-4 space-y-2">
             <button
-              onClick={() => setShowEditProfile(true)}
+              onClick={openEditProfile}
               className="btn-secondary w-full"
               title="Edit your profile information"
             >
@@ -144,7 +220,7 @@ function Profile() {
 
         {showEditProfile && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="card-surface max-w-md space-y-4 p-6">
+            <div className="card-surface max-h-[90vh] w-full max-w-md space-y-4 overflow-y-auto p-6">
               <h3 className="font-display text-lg font-bold">Edit Profile</h3>
               <label>
                 <span className="mb-1 block text-sm font-semibold">Name</span>
@@ -153,6 +229,35 @@ function Profile() {
                   value={editData.name}
                   onChange={(e) => setEditData({ ...editData, name: e.target.value })}
                   className="field"
+                />
+              </label>
+              <label>
+                <span className="mb-1 block text-sm font-semibold">Email</span>
+                <input
+                  type="email"
+                  value={editData.email}
+                  onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                  className="field"
+                />
+              </label>
+              <label>
+                <span className="mb-1 block text-sm font-semibold">Cellphone number</span>
+                <input
+                  type="tel"
+                  value={editData.phone}
+                  onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                  className="field"
+                  placeholder="e.g. 072 418 9032"
+                />
+              </label>
+              <label>
+                <span className="mb-1 block text-sm font-semibold">Location</span>
+                <input
+                  type="text"
+                  value={editData.location}
+                  onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                  className="field"
+                  placeholder="Your suburb or address"
                 />
               </label>
               <label>

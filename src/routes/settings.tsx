@@ -326,15 +326,15 @@ function Settings() {
         <div className="card-surface p-6 lg:col-span-2">
           <h2 className="font-display text-lg font-bold">Support</h2>
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <button onClick={() => toast.info("Help centre articles are being prepared for launch.")} className="btn-secondary w-full" title="Visit help center">
+            <Link to="/help" className="btn-secondary w-full" title="Visit help center">
               Help centre
-            </button>
-            <button onClick={() => toast.success("Problem report opened. A support agent will follow up.")} className="btn-secondary w-full" title="Report a problem">
+            </Link>
+            <Link to="/report-problem" className="btn-secondary w-full" title="Report a problem">
               Report a problem
-            </button>
-            <button onClick={() => toast.info("Community guidelines: be respectful, pay fairly, and keep all job communication inside Connectly.")} className="btn-secondary w-full" title="Read community guidelines">
+            </Link>
+            <Link to="/community-guidelines" className="btn-secondary w-full" title="Read community guidelines">
               Community guidelines
-            </button>
+            </Link>
           </div>
           <button onClick={signOut} className="btn-ghost mt-4 w-full !text-destructive">
             Log out
